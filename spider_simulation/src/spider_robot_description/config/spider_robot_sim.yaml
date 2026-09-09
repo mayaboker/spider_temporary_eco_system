@@ -28,14 +28,13 @@ forward_velocity_controller:
 forward_position_controller:
   ros__parameters:
     joints:
-      - fl_steering_joint
-      - fr_steering_joint
-      - rl_steering_joint
-      - rr_steering_joint
+      - fl_flipper_joint
+      - fr_flipper_joint
+      - rl_flipper_joint
+      - rr_flipper_joint
     interface_name: position
     command_interfaces:
       - position
     state_interfaces:
       - position
       - velocity
-

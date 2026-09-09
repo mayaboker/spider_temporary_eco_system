@@ -2,6 +2,38 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
   <xacro:include filename="$(find spider_robot_description)/robots/parts/base/base.gazebo.xacro"/>
+
+  <xacro:macro name="main_track_visual" params="side">
+	<!-- Fixed visible track; hidden wheel contacts supply its motion. -->
+	<visual>
+	  <origin xyz="0 ${side * 0.052} -0.010"/>
+	  <geometry>
+		<box size="0.145 0.030 0.047"/>
+	  </geometry>
+	  <material name="track_rubber"/>
+	</visual>
+	<visual>
+	  <origin xyz="0 ${side * 0.052} -0.010"/>
+	  <geometry>
+		<box size="0.108 0.033 0.027"/>
+	  </geometry>
+	  <material name="spider_orange"/>
+	</visual>
+	<visual>
+	  <origin xyz="0.050 ${side * 0.052} -0.010" rpy="1.57079632679 0 0"/>
+	  <geometry>
+		<cylinder radius="0.017" length="0.035"/>
+	  </geometry>
+	  <material name="roller_metal"/>
+	</visual>
+	<visual>
+	  <origin xyz="-0.050 ${side * 0.052} -0.010" rpy="1.57079632679 0 0"/>
+	  <geometry>
+		<cylinder radius="0.017" length="0.035"/>
+	  </geometry>
+	  <material name="roller_metal"/>
+	</visual>
+  </xacro:macro>
   
   <xacro:macro name="base_v0" params="parent *joint_origin">
 	<joint name="base_link_joint" type="fixed">
@@ -16,6 +48,8 @@
 		  <mesh filename="package://spider_robot_description/meshes/DAE/base/base_link.dae"/>
 		</geometry>
 	  </visual>
+	  <xacro:main_track_visual side="1"/>
+	  <xacro:main_track_visual side="-1"/>
 	  <collision>
 		<origin xyz="0 0 0.017"/>
 		<geometry>

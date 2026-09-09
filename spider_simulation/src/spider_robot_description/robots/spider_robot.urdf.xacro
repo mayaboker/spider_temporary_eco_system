@@ -16,6 +16,15 @@
   <material name="white">
     <color rgba="1.0 1.0 1.0 1.0"/>
   </material>
+  <material name="track_rubber">
+    <color rgba="0.035 0.045 0.055 1.0"/>
+  </material>
+  <material name="spider_orange">
+    <color rgba="0.95 0.32 0.04 1.0"/>
+  </material>
+  <material name="roller_metal">
+    <color rgba="0.30 0.34 0.38 1.0"/>
+  </material>
 
   <!-- =============== Link & Joint =============== -->
   <!-- Base -->
@@ -34,47 +43,47 @@
 	<origin xyz="0.0 0 0.035"/>
   </xacro:lidar_head_v0>
 
-  <!-- Suspension -->
-  <!-- Front Right Sus -->
-  <xacro:steering_v0 prefix="fr" parent="base_link">
+  <!-- Articulated tracked flippers -->
+  <!-- Front right flipper -->
+  <xacro:flipper_v0 prefix="fr" parent="base_link" direction="1" side="-1">
 	<origin xyz="0.077 -0.031 -0.004"/>
-	<axis xyz="0 0 1"/>
-  </xacro:steering_v0>
-  <!-- Front Left Sus -->
-  <xacro:steering_v0 prefix="fl" parent="base_link">
+	<axis xyz="0 -1 0"/>
+  </xacro:flipper_v0>
+  <!-- Front left flipper -->
+  <xacro:flipper_v0 prefix="fl" parent="base_link" direction="1" side="1">
 	<origin xyz="0.077 0.031 -0.004"/>
-	<axis xyz="0 0 1"/>
-  </xacro:steering_v0>
-  <!-- Rear Right Sus -->
-  <xacro:steering_v0 prefix="rr" parent="base_link">
+	<axis xyz="0 -1 0"/>
+  </xacro:flipper_v0>
+  <!-- Rear right flipper -->
+  <xacro:flipper_v0 prefix="rr" parent="base_link" direction="-1" side="-1">
 	<origin xyz="-0.077 -0.031 -0.004"/>
-	<axis xyz="0 0 1"/>
-  </xacro:steering_v0>
-  <!-- Rear Left Sus -->
-  <xacro:steering_v0 prefix="rl" parent="base_link">
+	<axis xyz="0 1 0"/>
+  </xacro:flipper_v0>
+  <!-- Rear left flipper -->
+  <xacro:flipper_v0 prefix="rl" parent="base_link" direction="-1" side="1">
 	<origin xyz="-0.077 0.031 -0.004"/>
-	<axis xyz="0 0 1"/>
-  </xacro:steering_v0>
+	<axis xyz="0 1 0"/>
+  </xacro:flipper_v0>
 
   <!-- Wheel -->
   <!-- Front Right Wheel -->
-  <xacro:wheel_v0 prefix="fr" parent="fr_steering_link">
-	<origin xyz="0 -0.021 -0.025"/>
+  <xacro:wheel_v0 prefix="fr" parent="base_link">
+	<origin xyz="0.077 -0.052 -0.029"/>
 	<axis xyz="0 1 0"/>
   </xacro:wheel_v0>
   <!--  Front Left Wheel -->
-  <xacro:wheel_v0 prefix="fl" parent="fl_steering_link">
-	<origin xyz="0 0.021 -0.025" rpy="0 0 ${M_PI}"/>
+  <xacro:wheel_v0 prefix="fl" parent="base_link">
+	<origin xyz="0.077 0.052 -0.029" rpy="0 0 ${M_PI}"/>
 	<axis xyz="0 -1 0"/>
   </xacro:wheel_v0>
   <!-- Rear Right Wheel -->
-  <xacro:wheel_v0 prefix="rr" parent="rr_steering_link">
-	<origin xyz="0 -0.021 -0.025"/>
+  <xacro:wheel_v0 prefix="rr" parent="base_link">
+	<origin xyz="-0.077 -0.052 -0.029"/>
 	<axis xyz="0 1 0"/>
   </xacro:wheel_v0>
   <!--  Rear Left Wheel -->
-  <xacro:wheel_v0 prefix="rl" parent="rl_steering_link">
-	<origin xyz="0 0.021 -0.025" rpy="0 0 ${M_PI}"/>
+  <xacro:wheel_v0 prefix="rl" parent="base_link">
+	<origin xyz="-0.077 0.052 -0.029" rpy="0 0 ${M_PI}"/>
 	<axis xyz="0 -1 0"/>
   </xacro:wheel_v0>
 
@@ -95,11 +104,11 @@
   <xacro:wheel_gazebo_v0 prefix="rr"/>
   <xacro:wheel_gazebo_v0 prefix="rl"/>
 
-  <!-- Steering -->
-  <xacro:steering_gazebo_v0 prefix="front_right"/>
-  <xacro:steering_gazebo_v0 prefix="front_left"/>
-  <xacro:steering_gazebo_v0 prefix="rear_right"/>
-  <xacro:steering_gazebo_v0 prefix="rear_left"/>
+  <!-- Flippers -->
+  <xacro:flipper_gazebo_v0 prefix="fr"/>
+  <xacro:flipper_gazebo_v0 prefix="fl"/>
+  <xacro:flipper_gazebo_v0 prefix="rr"/>
+  <xacro:flipper_gazebo_v0 prefix="rl"/>
 
   <xacro:spider_robot_gazebo/>
     

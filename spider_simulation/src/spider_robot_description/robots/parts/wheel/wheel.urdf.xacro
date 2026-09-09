@@ -16,11 +16,12 @@
 	</joint>
 
 	<link name="${prefix}_wheel_link">
-	  <visual>
-		<geometry>
-		  <mesh filename="package://spider_robot_description/meshes/DAE/wheel/wheel_link.dae"/>
-		</geometry>
-	  </visual>
+	  <!--
+	    Gazebo's DiffDrive system requires rotating wheel joints. These
+	    cylinders are deliberately collision-only: the Spider is rendered as a
+	    tracked vehicle, while the hidden contacts provide stable skid-steer
+	    physics.
+	  -->
 	  <collision>
 		<origin xyz="0 0 0" rpy="1.57079632679 0 0"/>
 		<geometry>

@@ -3,31 +3,57 @@
 
   <xacro:include filename="$(find spider_robot_description)/robots/parts/suspension/suspension.gazebo.xacro"/>
   
-  <xacro:macro name="steering_v0" params="prefix parent *joint_origin *joint_axis">
-	<joint name="${prefix}_steering_joint" type="revolute">
+  <xacro:macro name="flipper_v0" params="prefix parent direction side *joint_origin *joint_axis">
+	<joint name="${prefix}_flipper_joint" type="revolute">
 	  <xacro:insert_block name="joint_origin"/>
 	  <parent link="${parent}"/>
-	  <child link="${prefix}_steering_link"/>
+	  <child link="${prefix}_flipper_link"/>
           <limit effort="5" velocity="6.28"  lower="-2.1" upper="2.1" />
           <xacro:insert_block name="joint_axis"/>
 	</joint>
 
-	<link name="${prefix}_steering_link">
+	<link name="${prefix}_flipper_link">
+	  <!-- Rubber belt around the flipper body. -->
 	  <visual>
+		<origin xyz="${direction * 0.045} ${side * 0.020} -0.010"/>
 		<geometry>
-		  <mesh filename="package://spider_robot_description/meshes/DAE/suspension/${prefix}_link.dae"/>
+		  <box size="0.105 0.026 0.034"/>
 		</geometry>
+		<material name="track_rubber"/>
+	  </visual>
+	  <!-- Coloured side plate leaves a dark belt visible around its edge. -->
+	  <visual>
+		<origin xyz="${direction * 0.045} ${side * 0.020} -0.010"/>
+		<geometry>
+		  <box size="0.077 0.029 0.018"/>
+		</geometry>
+		<material name="spider_orange"/>
+	  </visual>
+	  <!-- End rollers make the primitive geometry read as a tracked flipper. -->
+	  <visual>
+		<origin xyz="${direction * 0.010} ${side * 0.020} -0.010" rpy="1.57079632679 0 0"/>
+		<geometry>
+		  <cylinder radius="0.012" length="0.030"/>
+		</geometry>
+		<material name="roller_metal"/>
+	  </visual>
+	  <visual>
+		<origin xyz="${direction * 0.080} ${side * 0.020} -0.010" rpy="1.57079632679 0 0"/>
+		<geometry>
+		  <cylinder radius="0.012" length="0.030"/>
+		</geometry>
+		<material name="roller_metal"/>
 	  </visual>
 	  <collision>
+		<origin xyz="${direction * 0.045} ${side * 0.020} -0.010"/>
 		<geometry>
-		  <!-- Keep mesh visuals, but use portable primitive collision. -->
-		  <box size="0.055 0.018 0.012"/>
+		  <box size="0.100 0.024 0.030"/>
 		</geometry>
 	  </collision>
 	  <inertial>
-		<origin xyz="0 0 -0.02"/>
+		<origin xyz="${direction * 0.045} ${side * 0.020} -0.010"/>
 		<mass value="0.15"/>
-		<inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.000004" />
+		<inertia ixx="0.000025" ixy="0" ixz="0" iyy="0.000150" iyz="0" izz="0.000150" />
 	  </inertial>
 	</link>
   </xacro:macro>

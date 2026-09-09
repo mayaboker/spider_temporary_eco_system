@@ -61,8 +61,8 @@ WHEEL_RADIUS = 0.026
 # forward_velocity_controller joint order, from spider_robot_sim.yaml.
 WHEEL_JOINTS = ("fl_wheel_joint", "fr_wheel_joint", "rl_wheel_joint", "rr_wheel_joint")
 # forward_position_controller joint order, same file.
-FLIPPER_JOINTS = ("fl_steering_joint", "fr_steering_joint",
-                  "rl_steering_joint", "rr_steering_joint")
+FLIPPER_JOINTS = ("fl_flipper_joint", "fr_flipper_joint",
+                  "rl_flipper_joint", "rr_flipper_joint")
 
 # The Teensy sends flippers CLOCKWISE -- FL, FR, RR, RL -- while the controller
 # expects fl, fr, rl, rr. Getting this wrong silently swaps the rear pair.

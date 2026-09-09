@@ -49,13 +49,12 @@
         <odom_publish_frequency>50</odom_publish_frequency>
       </plugin>
 
-      <!-- Flippers: the four steering joints stand in for flipper pivots.
-           Position control holds them against gravity, which is what the real
-           Teensy PID loop does. -->
-      <xacro:flipper_controller joint="fl_steering_joint" topic="flipper/fl"/>
-      <xacro:flipper_controller joint="fr_steering_joint" topic="flipper/fr"/>
-      <xacro:flipper_controller joint="rl_steering_joint" topic="flipper/rl"/>
-      <xacro:flipper_controller joint="rr_steering_joint" topic="flipper/rr"/>
+      <!-- Position control holds the flippers against gravity, matching the
+           real Teensy PID loop. -->
+      <xacro:flipper_controller joint="fl_flipper_joint" topic="flipper/fl"/>
+      <xacro:flipper_controller joint="fr_flipper_joint" topic="flipper/fr"/>
+      <xacro:flipper_controller joint="rl_flipper_joint" topic="flipper/rl"/>
+      <xacro:flipper_controller joint="rr_flipper_joint" topic="flipper/rr"/>
 
       <!-- Telemetry source for the Teensy bridge. -->
       <plugin filename="gz-sim-joint-state-publisher-system"
