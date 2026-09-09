@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find spider_robot_description)/robots/parts/wheel/wheel.gazebo.xacro"/>
+  
+  <xacro:macro name="wheel_v0" params="prefix parent *joint_origin *joint_axis">
+	<joint name="${prefix}_wheel_joint" type="continuous">
+	  <xacro:insert_block name="joint_origin"/>
+	  <parent link="${parent}"/>
+	  <child link="${prefix}_wheel_link"/>
+      <!-- At the 0.026 m wheel radius, a full 1 m/s + 1 rad/s TWIST needs
+           40.81 rad/s on the faster side. A 20 rad/s cap saturated both
+           sides equally at high throttle and erased the steering command. -->
+      <limit effort="1.5" velocity="50"/>
+	  <xacro:insert_block name="joint_axis"/>
+	</joint>
+
+	<link name="${prefix}_wheel_link">
+	  <visual>
+		<geometry>
+		  <mesh filename="package://spider_robot_description/meshes/DAE/wheel/wheel_link.dae"/>
+		</geometry>
+	  </visual>
+	  <collision>
+		<origin xyz="0 0 0" rpy="1.57079632679 0 0"/>
+		<geometry>
+		  <!-- Primitive collision works with Gazebo's default DART engine. -->
+		  <cylinder radius="0.026" length="0.020"/>
+		</geometry>
+	  </collision>
+	  <inertial>
+		<origin xyz="0.0 -0.007 -0.0"/>
+		<mass value="0.05"/>
+		<inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.000018" iyz="0" izz="0.00001"/>
+	  </inertial>
+	</link>
+  </xacro:macro>
+  
+</robot>

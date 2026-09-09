@@ -1,0 +1,22 @@
+{
+  "device": "/dev/input/js0",
+  "steering": {"axis": 0, "minimum": -1.0, "maximum": 1.0, "invert": false, "deadzone": 0.05},
+  "clutch": {"axis": 1, "released": 1.0, "pressed": -1.0},
+  "accelerator": {"axis": 2, "released": 1.0, "pressed": -1.0},
+  "brake": {"axis": 3, "released": 1.0, "pressed": -1.0},
+  "buttons": [
+    {"index": 4, "label": "R2", "x": 0.75, "y": 0.64},
+    {"index": 5, "label": "L2", "x": 0.25, "y": 0.64},
+    {"index": 6, "label": "Share", "x": 0.39, "y": 0.58},
+    {"index": 7, "label": "Options", "x": 0.61, "y": 0.58},
+    {"index": 8, "label": "R3", "x": 0.68, "y": 0.66},
+    {"index": 9, "label": "L3", "x": 0.32, "y": 0.66},
+    {"index": 10, "label": "PS", "x": 0.50, "y": 0.62},
+    {"index": 11, "label": "Left paddle", "x": 0.16, "y": 0.42},
+    {"index": 12, "label": "Right paddle", "x": 0.84, "y": 0.42},
+    {"index": 19, "label": "Up", "x": 0.58, "y": 0.36, "action": "flippers_up"},
+    {"index": 20, "label": "Down", "x": 0.42, "y": 0.36, "action": "flippers_down"},
+    {"index": 23, "label": "DIR", "x": 0.61, "y": 0.72, "action": "toggle_direction"}
+  ],
+  "flipper_velocity": 20.0
+}

@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!--
+    Driven by core gz-sim systems rather than ros2_control.
+
+    The installed gz_ros2_control (1.2.19) and controller_manager (4.45.2) do
+    not agree on how the parameters file reaches controller nodes: every
+    controller is constructed with an empty params-file argument and throws
+    RCLInvalidROSArgsError before it can initialise. DiffDrive and
+    JointPositionController need no controller manager at all, and are
+    sufficient for operator- and protocol-level fidelity.
+  -->
+
+  <xacro:macro name="flipper_controller" params="joint topic">
+    <plugin filename="gz-sim-joint-position-controller-system"
+            name="gz::sim::systems::JointPositionController">
+      <joint_name>${joint}</joint_name>
+      <topic>${topic}</topic>
+      <p_gain>2.0</p_gain>
+      <i_gain>0.05</i_gain>
+      <d_gain>0.1</d_gain>
+      <i_max>1.0</i_max>
+      <i_min>-1.0</i_min>
+      <cmd_max>20.0</cmd_max>
+      <cmd_min>-20.0</cmd_min>
+    </plugin>
+  </xacro:macro>
+
+  <xacro:macro name="spider_robot_gazebo">
+
+    <!-- =============== Gazebo =============== -->
+    <gazebo>
+      <!-- Tracks: skid steer approximated as a differential drive across both
+           wheels on each side. -->
+      <plugin filename="gz-sim-diff-drive-system"
+              name="gz::sim::systems::DiffDrive">
+        <left_joint>fl_wheel_joint</left_joint>
+        <left_joint>rl_wheel_joint</left_joint>
+        <right_joint>fr_wheel_joint</right_joint>
+        <right_joint>rr_wheel_joint</right_joint>
+        <wheel_separation>0.122</wheel_separation>
+        <wheel_radius>0.026</wheel_radius>
+        <max_linear_acceleration>2.0</max_linear_acceleration>
+        <topic>cmd_vel</topic>
+        <odom_topic>odom</odom_topic>
+        <frame_id>odom</frame_id>
+        <child_frame_id>base_footprint</child_frame_id>
+        <odom_publish_frequency>50</odom_publish_frequency>
+      </plugin>
+
+      <!-- Flippers: the four steering joints stand in for flipper pivots.
+           Position control holds them against gravity, which is what the real
+           Teensy PID loop does. -->
+      <xacro:flipper_controller joint="fl_steering_joint" topic="flipper/fl"/>
+      <xacro:flipper_controller joint="fr_steering_joint" topic="flipper/fr"/>
+      <xacro:flipper_controller joint="rl_steering_joint" topic="flipper/rl"/>
+      <xacro:flipper_controller joint="rr_steering_joint" topic="flipper/rr"/>
+
+      <!-- Telemetry source for the Teensy bridge. -->
+      <plugin filename="gz-sim-joint-state-publisher-system"
+              name="gz::sim::systems::JointStatePublisher"/>
+
+      <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+        <render_engine>ogre2</render_engine>
+      </plugin>
+    </gazebo>
+
+    <gazebo reference="lidar_head_link" >
+      <sensor name="lidar_head_link" type="gpu_lidar">
+        <gz_frame_id>lidar_head_link</gz_frame_id>
+        <topic>scan</topic>
+        <update_rate>30</update_rate>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>2800</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.14</min_angle>
+              <max_angle>3.14</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>1</samples>
+              <resolution>0.1</resolution>
+              <min_angle>0.0</min_angle>
+              <max_angle>0.0</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.2</min>
+            <max>30.0</max>
+            <resolution>0.01</resolution>
+          </range>
+          <frame_id>/lidar_head_link</frame_id>
+        </lidar>
+        <always_on>true</always_on>
+        <visualize>true</visualize>
+      </sensor>
+    </gazebo>
+
+  </xacro:macro>
+
+</robot>
