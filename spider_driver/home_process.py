@@ -72,8 +72,23 @@ def run_home(field_host, field_port, config_path):
             QHBoxLayout, QLabel, QMainWindow,
             QScrollArea, QTabWidget, QTextEdit, QVBoxLayout, QWidget,
         )
-    except ImportError as exc:
-        raise SystemExit("PySide6 is required: python3 -m pip install -r requirements.txt") from exc
+    except ImportError:
+        # Qt5 fallback. ROS installs PySide2 system-wide, and every widget,
+        # painter and scoped enum this dashboard uses exists in both bindings,
+        # so the UI is identical. Only QApplication.exec() differs -- Qt5 spells
+        # it exec_(), which is why the run below tests for it.
+        try:
+            from PySide2.QtCore import QPointF, QRectF, Qt, QTimer
+            from PySide2.QtGui import QColor, QFont, QLinearGradient, QPainter, QPen, QPolygonF
+            from PySide2.QtWidgets import (
+                QApplication, QFrame, QGridLayout, QGroupBox,
+                QHBoxLayout, QLabel, QMainWindow,
+                QScrollArea, QTabWidget, QTextEdit, QVBoxLayout, QWidget,
+            )
+        except ImportError as exc:
+            raise SystemExit(
+                "PySide6 is required: python3 -m pip install -r requirements.txt"
+            ) from exc
 
     class WheelView(QWidget):
         """Scalable clean wheel artwork with separate live control overlays."""
@@ -413,4 +428,4 @@ def run_home(field_host, field_port, config_path):
     app = QApplication([])
     window = Dashboard()
     window.show()
-    return app.exec()
+    return app.exec() if hasattr(app, "exec") else app.exec_()

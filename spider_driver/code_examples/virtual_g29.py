@@ -85,11 +85,19 @@ def write_wheel_config(source, device, destination):
 
 
 def build_app(config, fifo, config_path):
-    from PySide6.QtCore import Qt, QTimer
-    from PySide6.QtWidgets import (
-        QApplication, QCheckBox, QGridLayout, QGroupBox, QHBoxLayout,
-        QLabel, QLineEdit, QPushButton, QSlider, QVBoxLayout, QWidget,
-    )
+    try:
+        from PySide6.QtCore import Qt, QTimer
+        from PySide6.QtWidgets import (
+            QApplication, QCheckBox, QGridLayout, QGroupBox, QHBoxLayout,
+            QLabel, QLineEdit, QPushButton, QSlider, QVBoxLayout, QWidget,
+        )
+    except ImportError:
+        # Same Qt5 fallback as the dashboard -- see home_process.run_home.
+        from PySide2.QtCore import Qt, QTimer
+        from PySide2.QtWidgets import (
+            QApplication, QCheckBox, QGridLayout, QGroupBox, QHBoxLayout,
+            QLabel, QLineEdit, QPushButton, QSlider, QVBoxLayout, QWidget,
+        )
 
     STYLE = """
     QWidget { background: #0b1020; color: #e8edf7; font-family: Inter, Ubuntu, sans-serif; }
@@ -229,7 +237,7 @@ def build_app(config, fifo, config_path):
     app = QApplication([])
     window = VirtualWheel()
     window.show()
-    return app.exec()
+    return app.exec() if hasattr(app, "exec") else app.exec_()
 
 
 def main(argv=None):
