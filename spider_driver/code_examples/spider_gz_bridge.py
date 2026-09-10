@@ -56,11 +56,12 @@ PLATFORMS = {"NONE": 0, "SPIDER_10": 1, "SPIDER_20": 2, "SPIDER_30": 3}
 CLIENT_MAX_INACTIVITY = 3.0
 MOTOR_COUNT = 8
 
-WHEEL_RADIUS = 0.026
+WHEEL_RADIUS = 0.1
 
-# forward_velocity_controller joint order, from spider_robot_sim.yaml.
-WHEEL_JOINTS = ("fl_wheel_joint", "fr_wheel_joint", "rl_wheel_joint", "rr_wheel_joint")
-# forward_position_controller joint order, same file.
+# Inner track wheel of each flipper, the one on the arm pivot axis. Each
+# flipper also carries an outer "_track_wheel_2_" wheel, which spins
+# identically, so these four are enough for motor and track telemetry.
+WHEEL_JOINTS = ("fl_track_wheel_joint", "fr_track_wheel_joint", "rl_track_wheel_joint", "rr_track_wheel_joint")
 FLIPPER_JOINTS = ("fl_flipper_joint", "fr_flipper_joint",
                   "rl_flipper_joint", "rr_flipper_joint")
 
@@ -68,7 +69,16 @@ FLIPPER_JOINTS = ("fl_flipper_joint", "fr_flipper_joint",
 # expects fl, fr, rl, rr. Getting this wrong silently swaps the rear pair.
 TEENSY_TO_CONTROLLER = (0, 1, 3, 2)
 
-FLIPPER_LIMIT_DEG = 85.0
+# The flippers are mirrored about the centre of the vehicle: the rear arms
+# extend along -x, so an identical joint angle swings them the opposite way in
+# space. The Teensy convention is that a positive command raises every arm, so
+# the front pair reaches "up" through a negative joint angle and has to be
+# negated here. Signs are in Teensy order, FL, FR, RR, RL.
+FLIPPER_SIGN = (-1.0, -1.0, 1.0, 1.0)
+
+# The spider arm joints travel +/-1.46 rad; clamping just inside that keeps
+# the integrated setpoint from fighting the joint limit.
+FLIPPER_LIMIT_DEG = 83.6
 
 
 def reorder_flippers(teensy_values):
@@ -82,6 +92,15 @@ def restore_flipper_order(controller_values):
     for teensy_index, controller_index in enumerate(TEENSY_TO_CONTROLLER):
         restored[teensy_index] = controller_values[controller_index]
     return restored
+
+
+def apply_flipper_sign(teensy_values):
+    """Teensy "positive is up" <-> mirrored joint angles.
+
+    Self-inverse, since every sign is +/-1, so the same call converts a command
+    on the way in and a measurement on the way back out.
+    """
+    return [value * sign for value, sign in zip(teensy_values, FLIPPER_SIGN)]
 
 
 class SpiderGzBridge(Node):
@@ -165,7 +184,8 @@ class SpiderGzBridge(Node):
                         self.flipper_target[index] + self.flipper_rate[index] * 0.02))
 
         positions = [math.radians(value) * self.flipper_scale
-                     for value in reorder_flippers(self.flipper_target)]
+                     for value in reorder_flippers(
+                         apply_flipper_sign(self.flipper_target))]
         for publisher, position in zip(self.pub_flippers, positions):
             command = Float64()
             command.data = position
@@ -286,11 +306,11 @@ class SpiderGzBridge(Node):
     def _flipper_positions(self):
         measured = [math.degrees(self._joint(name)[0]) / (self.flipper_scale or 1.0)
                     for name in FLIPPER_JOINTS]
-        return restore_flipper_order(measured)
+        return apply_flipper_sign(restore_flipper_order(measured))
 
     def _track_data(self):
-        left = self._joint("fl_wheel_joint")
-        right = self._joint("fr_wheel_joint")
+        left = self._joint("fl_track_wheel_joint")
+        right = self._joint("fr_track_wheel_joint")
         return struct.pack("=4f", left[1] * WHEEL_RADIUS, right[1] * WHEEL_RADIUS,
                            left[0] * WHEEL_RADIUS, right[0] * WHEEL_RADIUS)
 

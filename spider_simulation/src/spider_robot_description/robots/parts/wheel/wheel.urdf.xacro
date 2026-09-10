@@ -2,39 +2,72 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
   <xacro:include filename="$(find spider_robot_description)/robots/parts/wheel/wheel.gazebo.xacro"/>
-  
-  <xacro:macro name="wheel_v0" params="prefix parent *joint_origin *joint_axis">
-	<joint name="${prefix}_wheel_joint" type="continuous">
+
+  <!--
+    A wheel that a flipper's track runs around, not a road wheel: two per
+    flipper, the inner one on the flipper's own pivot axis so it stays put as
+    the arm swings, the outer one at the arm's tip. The parent is therefore
+    the flipper link, not base_link.
+
+    `suffix` selects which of the pair this is. It is empty for the inner
+    wheel, whose joint the Teensy bridge reads telemetry from; the outer one
+    becomes `_track_wheel_2_`.
+
+    As with the flippers, the mirrored L/R meshes carry mirrored offsets, so
+    both are derived from the mesh name.
+  -->
+  <xacro:property name="wheel_stl_l" value="Wheel_L_bin.STL"/>
+  <xacro:property name="wheel_stl_r" value="Wheel_R_bin.STL"/>
+
+  <xacro:macro name="wheel_v0" params="prefix parent stl suffix:='' *joint_origin">
+	<joint name="${prefix}_track_wheel${suffix}_joint" type="continuous">
 	  <xacro:insert_block name="joint_origin"/>
 	  <parent link="${parent}"/>
-	  <child link="${prefix}_wheel_link"/>
-      <!-- At the 0.026 m wheel radius, a full 1 m/s + 1 rad/s TWIST needs
-           40.81 rad/s on the faster side. A 20 rad/s cap saturated both
-           sides equally at high throttle and erased the steering command. -->
-      <limit effort="1.5" velocity="50"/>
-	  <xacro:insert_block name="joint_axis"/>
+	  <child link="${prefix}_track_wheel${suffix}_link"/>
+	  <axis xyz="0 1 0"/>
+	  <!--
+	    At the 0.1 m Spider wheel radius a full 1 m/s + 1 rad/s TWIST needs
+	    about 11.4 rad/s on the faster side, so 20 rad/s leaves headroom
+	    without letting the faster side saturate and erase the steering
+	    command. Effort matches the 20 N.m the source description gave its
+	    drive plugin.
+	  -->
+	  <limit effort="20" velocity="20"/>
 	</joint>
 
-	<link name="${prefix}_wheel_link">
-	  <!--
-	    Gazebo's DiffDrive system requires rotating wheel joints. These
-	    cylinders are deliberately collision-only: the Spider is rendered as a
-	    tracked vehicle, while the hidden contacts provide stable skid-steer
-	    physics.
-	  -->
+	<link name="${prefix}_track_wheel${suffix}_link">
+	  <visual>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<geometry>
+		  <mesh filename="package://spider_robot_description/meshes/STL/spider/${stl}"
+		        scale="0.001 0.001 0.001"/>
+		</geometry>
+		<material name="spider_gray"/>
+	  </visual>
 	  <collision>
-		<origin xyz="0 0 0" rpy="1.57079632679 0 0"/>
+		<xacro:if value="${stl == wheel_stl_l}">
+		  <origin xyz="0 0.031 0" rpy="1.57079632679 0 0"/>
+		</xacro:if>
+		<xacro:unless value="${stl == wheel_stl_l}">
+		  <origin xyz="0 -0.031 0" rpy="1.57079632679 0 0"/>
+		</xacro:unless>
 		<geometry>
 		  <!-- Primitive collision works with Gazebo's default DART engine. -->
-		  <cylinder radius="0.026" length="0.020"/>
+		  <cylinder radius="0.1" length="0.11"/>
 		</geometry>
 	  </collision>
 	  <inertial>
-		<origin xyz="0.0 -0.007 -0.0"/>
-		<mass value="0.05"/>
-		<inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.000018" iyz="0" izz="0.00001"/>
+		<xacro:if value="${stl == wheel_stl_l}">
+		  <origin xyz="0 0.039 0" rpy="0 0 0"/>
+		</xacro:if>
+		<xacro:unless value="${stl == wheel_stl_l}">
+		  <origin xyz="0 -0.039 0" rpy="0 0 0"/>
+		</xacro:unless>
+		<mass value="0.898"/>
+		<inertia ixx="0.003834480" ixy="0" ixz="0"
+		         iyy="0.004561738" iyz="0" izz="0.003834480"/>
 	  </inertial>
 	</link>
   </xacro:macro>
-  
+
 </robot>

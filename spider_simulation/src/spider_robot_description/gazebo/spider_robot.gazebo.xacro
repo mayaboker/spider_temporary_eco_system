@@ -17,13 +17,19 @@
             name="gz::sim::systems::JointPositionController">
       <joint_name>${joint}</joint_name>
       <topic>${topic}</topic>
-      <p_gain>2.0</p_gain>
-      <i_gain>0.05</i_gain>
-      <d_gain>0.1</d_gain>
-      <i_max>1.0</i_max>
-      <i_min>-1.0</i_min>
-      <cmd_max>20.0</cmd_max>
-      <cmd_min>-20.0</cmd_min>
+      <!--
+        An arm holds its own 0.322 kg plus a 0.898 kg wheel at 0.24 m, so
+        gravity alone asks about 2.5 N.m at full extension. The previous
+        gains were sized for the old decorative flippers and sag under that.
+        cmd_max matches the joint's 100 N.m effort limit.
+      -->
+      <p_gain>50.0</p_gain>
+      <i_gain>1.0</i_gain>
+      <d_gain>5.0</d_gain>
+      <i_max>20.0</i_max>
+      <i_min>-20.0</i_min>
+      <cmd_max>100.0</cmd_max>
+      <cmd_min>-100.0</cmd_min>
     </plugin>
   </xacro:macro>
 
@@ -31,16 +37,27 @@
 
     <!-- =============== Gazebo =============== -->
     <gazebo>
-      <!-- Tracks: skid steer approximated as a differential drive across both
-           wheels on each side. -->
+      <!-- Tracks: skid steer approximated as a differential drive across all
+           four track wheels on each side. -->
       <plugin filename="gz-sim-diff-drive-system"
               name="gz::sim::systems::DiffDrive">
-        <left_joint>fl_wheel_joint</left_joint>
-        <left_joint>rl_wheel_joint</left_joint>
-        <right_joint>fr_wheel_joint</right_joint>
-        <right_joint>rr_wheel_joint</right_joint>
-        <wheel_separation>0.122</wheel_separation>
-        <wheel_radius>0.026</wheel_radius>
+        <left_joint>fl_track_wheel_joint</left_joint>
+        <left_joint>fl_track_wheel_2_joint</left_joint>
+        <left_joint>rl_track_wheel_joint</left_joint>
+        <left_joint>rl_track_wheel_2_joint</left_joint>
+        <right_joint>fr_track_wheel_joint</right_joint>
+        <right_joint>fr_track_wheel_2_joint</right_joint>
+        <right_joint>rr_track_wheel_joint</right_joint>
+        <right_joint>rr_track_wheel_2_joint</right_joint>
+        <!--
+          Geometric separation: the arm pivots sit at y=+/-0.0755 and each
+          wheel a further 0.06 outboard, so 2 * 0.1355. The source description
+          declared 0.3 to its ROS 1 skid-steer plugin, but that value only
+          scaled that plugin's mixing; odometry here is better served by the
+          real number.
+        -->
+        <wheel_separation>0.271</wheel_separation>
+        <wheel_radius>0.1</wheel_radius>
         <max_linear_acceleration>2.0</max_linear_acceleration>
         <topic>cmd_vel</topic>
         <odom_topic>odom</odom_topic>
@@ -49,7 +66,7 @@
         <odom_publish_frequency>50</odom_publish_frequency>
       </plugin>
 
-      <!-- Position control holds the flippers against gravity, matching the
+      <!-- Position control holds the arms against gravity, matching the
            real Teensy PID loop. -->
       <xacro:flipper_controller joint="fl_flipper_joint" topic="flipper/fl"/>
       <xacro:flipper_controller joint="fr_flipper_joint" topic="flipper/fr"/>

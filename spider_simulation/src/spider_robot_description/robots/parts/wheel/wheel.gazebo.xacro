@@ -1,11 +1,10 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="wheel_gazebo_v0" params="prefix">
-    <gazebo reference="${prefix}_wheel_link">
+  <xacro:macro name="wheel_gazebo_v0" params="prefix suffix:=''">
+    <gazebo reference="${prefix}_track_wheel${suffix}_link">
       <selfCollide>false</selfCollide>
       <mu1 value="1.2" />
       <mu2 value="1.2" />
     </gazebo>
   </xacro:macro>
 </robot>
-

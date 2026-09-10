@@ -67,7 +67,9 @@ def generate_launch_description():
         executable="create",
         output="screen",
         arguments=["-string", robot_desc,
-                   "-x", "0.0", "-y", "0.0", "-z", "0.07",
+                   # Spider rests with its track wheels 0.0296 m above
+                   # base_footprint, so 0.07 dropped a 9.6 kg robot 10 cm.
+                   "-x", "0.0", "-y", "0.0", "-z", "0.0",
                    "-R", "0.0", "-P", "0.0", "-Y", "0.0",
                    "-name", MODEL_NAME, "-allow_renaming", "false"],
     )

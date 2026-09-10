@@ -2,60 +2,68 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
   <xacro:include filename="$(find spider_robot_description)/robots/parts/suspension/suspension.gazebo.xacro"/>
-  
-  <xacro:macro name="flipper_v0" params="prefix parent direction side *joint_origin *joint_axis">
+
+  <!--
+    Spider flipper arm. On this robot the flipper is not decoration: it is the
+    track frame, and it carries the two wheels its track runs around (see
+    wheel.urdf.xacro). Rotating the joint swings the outer wheel up, which is
+    what lets the vehicle climb.
+
+    Two mirrored meshes are supplied (FL/RR share one, FR/RL the other) and the
+    inertial and collision offsets flip sign with them, so both are derived
+    from the mesh name rather than passed separately.
+  -->
+  <xacro:property name="flipper_stl_1" value="Flipper_FL_RR_bin.STL"/>
+  <xacro:property name="flipper_stl_2" value="Flipper_FR_RL_bin.STL"/>
+
+  <xacro:macro name="flipper_v0" params="prefix parent stl *joint_origin *joint_axis">
 	<joint name="${prefix}_flipper_joint" type="revolute">
 	  <xacro:insert_block name="joint_origin"/>
 	  <parent link="${parent}"/>
 	  <child link="${prefix}_flipper_link"/>
-          <limit effort="5" velocity="6.28"  lower="-2.1" upper="2.1" />
-          <xacro:insert_block name="joint_axis"/>
+	  <xacro:insert_block name="joint_axis"/>
+	  <dynamics damping="0.001" friction="0.0001"/>
+	  <!--
+	    The source description declares these joints "continuous" yet gives them
+	    limits, which URDF ignores on a continuous joint. Declaring them
+	    revolute makes the limits real, which the gz JointPositionController
+	    and the driver's own clamp both rely on. 1.46 rad = 83.6 deg.
+	  -->
+	  <limit effort="100" velocity="1.5708" lower="-1.46" upper="1.46"/>
 	</joint>
 
 	<link name="${prefix}_flipper_link">
-	  <!-- Rubber belt around the flipper body. -->
 	  <visual>
-		<origin xyz="${direction * 0.045} ${side * 0.020} -0.010"/>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
 		<geometry>
-		  <box size="0.105 0.026 0.034"/>
+		  <mesh filename="package://spider_robot_description/meshes/STL/spider/${stl}"
+		        scale="0.001 0.001 0.001"/>
 		</geometry>
-		<material name="track_rubber"/>
-	  </visual>
-	  <!-- Coloured side plate leaves a dark belt visible around its edge. -->
-	  <visual>
-		<origin xyz="${direction * 0.045} ${side * 0.020} -0.010"/>
-		<geometry>
-		  <box size="0.077 0.029 0.018"/>
-		</geometry>
-		<material name="spider_orange"/>
-	  </visual>
-	  <!-- End rollers make the primitive geometry read as a tracked flipper. -->
-	  <visual>
-		<origin xyz="${direction * 0.010} ${side * 0.020} -0.010" rpy="1.57079632679 0 0"/>
-		<geometry>
-		  <cylinder radius="0.012" length="0.030"/>
-		</geometry>
-		<material name="roller_metal"/>
-	  </visual>
-	  <visual>
-		<origin xyz="${direction * 0.080} ${side * 0.020} -0.010" rpy="1.57079632679 0 0"/>
-		<geometry>
-		  <cylinder radius="0.012" length="0.030"/>
-		</geometry>
-		<material name="roller_metal"/>
+		<material name="spider_black"/>
 	  </visual>
 	  <collision>
-		<origin xyz="${direction * 0.045} ${side * 0.020} -0.010"/>
+		<xacro:if value="${stl == flipper_stl_1}">
+		  <origin xyz="0.119 0.021 0.035" rpy="0 0 0"/>
+		</xacro:if>
+		<xacro:unless value="${stl == flipper_stl_1}">
+		  <origin xyz="0.119 -0.021 0.034" rpy="0 0 0"/>
+		</xacro:unless>
 		<geometry>
-		  <box size="0.100 0.024 0.030"/>
+		  <box size="0.316 0.091 0.146"/>
 		</geometry>
 	  </collision>
 	  <inertial>
-		<origin xyz="${direction * 0.045} ${side * 0.020} -0.010"/>
-		<mass value="0.15"/>
-		<inertia ixx="0.000025" ixy="0" ixz="0" iyy="0.000150" iyz="0" izz="0.000150" />
+		<xacro:if value="${stl == flipper_stl_1}">
+		  <origin xyz="0.123 0.033 0.029" rpy="0 0 0"/>
+		</xacro:if>
+		<xacro:unless value="${stl == flipper_stl_1}">
+		  <origin xyz="0.123 -0.033 0.029" rpy="0 0 0"/>
+		</xacro:unless>
+		<mass value="0.322"/>
+		<inertia ixx="0.001119686" ixy="0.0001239386" ixz="0.0001140656"
+		         iyy="0.008247686" iyz="0.000378888" izz="0.007985380"/>
 	  </inertial>
 	</link>
   </xacro:macro>
-  
+
 </robot>

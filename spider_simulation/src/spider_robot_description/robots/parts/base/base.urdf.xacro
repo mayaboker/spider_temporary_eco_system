@@ -3,38 +3,16 @@
 
   <xacro:include filename="$(find spider_robot_description)/robots/parts/base/base.gazebo.xacro"/>
 
-  <xacro:macro name="main_track_visual" params="side">
-	<!-- Fixed visible track; hidden wheel contacts supply its motion. -->
-	<visual>
-	  <origin xyz="0 ${side * 0.052} -0.010"/>
-	  <geometry>
-		<box size="0.145 0.030 0.047"/>
-	  </geometry>
-	  <material name="track_rubber"/>
-	</visual>
-	<visual>
-	  <origin xyz="0 ${side * 0.052} -0.010"/>
-	  <geometry>
-		<box size="0.108 0.033 0.027"/>
-	  </geometry>
-	  <material name="spider_orange"/>
-	</visual>
-	<visual>
-	  <origin xyz="0.050 ${side * 0.052} -0.010" rpy="1.57079632679 0 0"/>
-	  <geometry>
-		<cylinder radius="0.017" length="0.035"/>
-	  </geometry>
-	  <material name="roller_metal"/>
-	</visual>
-	<visual>
-	  <origin xyz="-0.050 ${side * 0.052} -0.010" rpy="1.57079632679 0 0"/>
-	  <geometry>
-		<cylinder radius="0.017" length="0.035"/>
-	  </geometry>
-	  <material name="roller_metal"/>
-	</visual>
-  </xacro:macro>
-  
+  <!--
+    Spider chassis. The caller supplies the 0.1346 m lift from base_footprint
+    that the source description expressed as a separate base_link -> body_link
+    joint; folding it into this joint keeps the link names the driver and
+    DiffDrive expect.
+
+    Unlike the earlier version of this base, the link carries no track
+    visuals: the tracks are the flipper arms themselves, so the drive geometry
+    lives entirely in the flipper and wheel macros.
+  -->
   <xacro:macro name="base_v0" params="parent *joint_origin">
 	<joint name="base_link_joint" type="fixed">
 	  <xacro:insert_block name="joint_origin"/>
@@ -44,25 +22,27 @@
 
 	<link name="base_link">
 	  <visual>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
 		<geometry>
-		  <mesh filename="package://spider_robot_description/meshes/DAE/base/base_link.dae"/>
+		  <mesh filename="package://spider_robot_description/meshes/STL/spider/Body_bin.STL"
+		        scale="0.001 0.001 0.001"/>
 		</geometry>
+		<material name="spider_gray"/>
 	  </visual>
-	  <xacro:main_track_visual side="1"/>
-	  <xacro:main_track_visual side="-1"/>
 	  <collision>
-		<origin xyz="0 0 0.017"/>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
 		<geometry>
-		  <!-- DART cannot create collision shapes from the original STL. -->
-		  <box size="0.19 0.09 0.034"/>
+		  <!-- Primitive collision; DART cannot build a shape from the mesh. -->
+		  <box size="0.293 0.190 0.073"/>
 		</geometry>
 	  </collision>
 	  <inertial>
-		<origin xyz="0 0 0.017"/>
-		<mass value="1.2"/>
-		<inertia ixx="0.0001873" ixy="0" ixz="0" iyy="0.000055" iyz="0" izz="0.0002283" />
+		<origin xyz="0 0 0.003" rpy="0 0 0"/>
+		<mass value="0.843"/>
+		<inertia ixx="0.004376981" ixy="0" ixz="0"
+		         iyy="0.010878840" iyz="0" izz="0.014340315"/>
 	  </inertial>
 	</link>
   </xacro:macro>
-  
+
 </robot>
