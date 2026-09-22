@@ -96,6 +96,12 @@ simulation  <--  bridge  <--  field  <--  control board
   Gazebo       UDP 8888     UDP 9999      G29 + dashboard
 ```
 
+To start all four at once in a tmux session instead, run `./run_all.sh`. It
+lays out one pane per component and gates each stage on the one below it —
+Gazebo's process, then UDP 8888, then UDP 9999 — so the order above holds even
+when the first-run colcon build is slow. The four terminals below are the same
+thing by hand.
+
 **Terminal 1 — simulation.** Gazebo, the robot model, and the ROS/gz topic
 bridges.
 
@@ -154,16 +160,20 @@ Ctrl-C each terminal, or from anywhere:
 ./kill_all.sh
 ```
 
+Under `run_all.sh`, press **prefix + K** instead — or run `./stop_all.sh`, which
+is the same thing: `kill_all.sh` first so the launchers reap their children,
+then `tmux kill-session`. Doing it in the other order SIGHUPs the panes out from
+under that cleanup.
+
 ---
 
 ## Variants
 
-**With a real G29**, replace terminal 4. Activate the venv first — this script
-calls bare `python3`, so without it you get the Qt5 fallback:
+**With a real G29**, replace terminal 4. No need to activate the venv — the
+script picks up `.venv/bin/python` itself, so you get PySide6 either way:
 
 ```bash
 cd spider_driver
-source .venv/bin/activate
 ./run_home_local.sh
 ```
 
